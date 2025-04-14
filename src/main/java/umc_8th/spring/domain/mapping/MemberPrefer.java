@@ -6,6 +6,8 @@ import umc_8th.spring.domain.FoodCategory;
 import umc_8th.spring.domain.Member;
 import umc_8th.spring.domain.common.BaseEntity;
 
+import java.util.Objects;
+
 @Entity
 @Getter
 @Builder
@@ -25,4 +27,16 @@ public class MemberPrefer extends BaseEntity {
     @JoinColumn(name = "category_id")
     private FoodCategory foodCategory;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MemberPrefer)) return false;
+        MemberPrefer that = (MemberPrefer) o;
+        return id != null && id.equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
