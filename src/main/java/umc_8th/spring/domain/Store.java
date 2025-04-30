@@ -21,6 +21,11 @@ public class Store extends BaseEntity {
     @Column(nullable = false, length = 50)
     private String name;
 
+    private String address;
+
+    @Column(nullable = false)
+    private Double rating = 0.0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     private Region region;
@@ -31,4 +36,14 @@ public class Store extends BaseEntity {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private List<Mission> missionList = new ArrayList<>();
 
+    @Override
+    public String toString() {
+        return "Store{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", rating=" + rating +
+                ", region=" + (region != null ? region.getName() : "N/A") + // region의 이름 출력
+                '}';
+    }
 }
