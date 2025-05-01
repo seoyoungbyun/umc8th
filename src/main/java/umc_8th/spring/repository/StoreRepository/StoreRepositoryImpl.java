@@ -16,14 +16,14 @@ public class StoreRepositoryImpl implements StoreRepositoryCustom{
     private final QStore store = QStore.store;
 
     @Override
-    public List<Store> dynamicQueryWithBooleanBuilder(String name, Float score) {
+    public List<Store> dynamicQueryWithBooleanBuilder(String name, Double rating) {
         BooleanBuilder predicate = new BooleanBuilder();
 
         if (name != null) {
             predicate.and(store.name.eq(name));
         }
 
-        if (score != null) {
+        if (rating != null) {
             predicate.and(store.rating.goe(4.0f));
         }
 

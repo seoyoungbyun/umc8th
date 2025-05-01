@@ -22,7 +22,7 @@ public class Review extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
-    private Integer rating;
+    private Double rating;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id")
