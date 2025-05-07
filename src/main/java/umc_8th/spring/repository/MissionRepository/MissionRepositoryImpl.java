@@ -59,7 +59,7 @@ public class MissionRepositoryImpl implements MissionRepositoryCustom{
         List<Tuple> result = jpaQueryFactory
                 .select(mission.id, mission.name, mission.description, mission.point, memberMission.status, store.name)
                 .from(mission)
-                .join(memberMission).on(member.id.eq(memberMission.mission.id))
+                .join(memberMission).on(memberMission.mission.eq(mission))
                 .join(store).on(mission.store.id.eq(store.id))
                 .where(predicate)
                 .orderBy(memberMission.updatedAt.desc())

@@ -13,7 +13,7 @@ import static com.querydsl.core.types.Projections.constructor;
 @RequiredArgsConstructor
 public class MemberRepositoryImpl implements MemberRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
-    private final QMember member;
+    private final QMember member = QMember.member;
 
     @Override
     public MyPageDTO getMyPage(Long memberId){
