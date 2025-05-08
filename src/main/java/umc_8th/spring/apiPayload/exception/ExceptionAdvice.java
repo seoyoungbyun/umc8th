@@ -3,21 +3,29 @@ package umc_8th.spring.apiPayload.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.hibernate.TypeMismatchException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import umc_8th.spring.apiPayload.ApiResponse;
 import umc_8th.spring.apiPayload.code.ErrorReasonDTO;
 import umc_8th.spring.apiPayload.code.status.ErrorStatus;
 
+import java.net.BindException;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +34,36 @@ import java.util.Optional;
 @RestControllerAdvice(annotations = {RestController.class})
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
+    @Value("${discord.webhook.url}")
+    private String discordWebhookUrl;
+
+    @Value("${spring.profiles.active:}")
+    private String activeProfile;
+
+    private HttpStatus resolveHttpStatus(Exception e) {
+        // 1. Spring에서 공식적으로 지정한 예외 처리 우선
+        if (e instanceof ResponseStatusException rse) {
+            return (HttpStatus) rse.getStatusCode();
+        }
+
+        ResponseStatus ann = AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class);
+        if (ann != null) return ann.code();
+
+        // 2. Spring MVC에서 흔히 400으로 처리하는 예외
+        if (e instanceof BindException ||
+                e instanceof MethodArgumentNotValidException ||
+                e instanceof ConstraintViolationException ||
+                e instanceof IllegalArgumentException ||
+                e instanceof MissingServletRequestParameterException ||
+                e instanceof MissingPathVariableException ||
+                e instanceof HttpMessageNotReadableException ||
+                e instanceof TypeMismatchException) {
+            return HttpStatus.BAD_REQUEST;
+        }
+
+        // 3. 그 외는 500
+        return HttpStatus.INTERNAL_SERVER_ERROR;
+    }
 
     @ExceptionHandler
     public ResponseEntity<Object> validation(ConstraintViolationException e, WebRequest request) {
@@ -54,7 +92,14 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<Object> exception(Exception e, WebRequest request) {
+        HttpStatus status = resolveHttpStatus(e);
+
         e.printStackTrace();
+
+        // 환경이 local이 아닐 때만 전송
+        if (!isLocalProfile() && status.is5xxServerError()) {
+            sendToDiscord(e, request);
+        }
 
         return handleExceptionInternalFalse(e, ErrorStatus._INTERNAL_SERVER_ERROR, HttpHeaders.EMPTY, ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(),request, e.getMessage());
     }
@@ -115,5 +160,28 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                 errorCommonStatus.getHttpStatus(),
                 request
         );
+    }
+
+    private void sendToDiscord(Exception e, WebRequest request) {
+        try {
+            String errorMessage = """
+            **500 에러 발생!**
+            - 발생 시각: %s
+            - 요청 URI: %s
+            - 예외: %s
+            """.formatted(LocalDateTime.now(), ((ServletWebRequest) request).getRequest().getRequestURI(), e.toString());
+
+            RestTemplate restTemplate = new RestTemplate();
+            Map<String, String> payload = Map.of("content", errorMessage);
+            HttpEntity<Map<String, String>> entity = new HttpEntity<>(payload);
+            restTemplate.postForEntity(discordWebhookUrl, entity, String.class);
+        } catch (Exception ex) {
+            log.error("디스코드 전송 실패: {}", ex.getMessage());
+        }
+    }
+
+
+    private boolean isLocalProfile() {
+        return "local".equalsIgnoreCase(activeProfile);
     }
 }

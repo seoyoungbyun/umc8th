@@ -28,4 +28,10 @@ public class TempRestController {
         tempQueryService.CheckFlag(flag);
         return ApiResponse.onSuccess(TempConverter.toTempExceptionDTO(flag));
     }
+
+    @GetMapping("/error-test")
+    public String forceError() {
+        throw new RuntimeException("테스트용 예외");
+    }
+
 }
