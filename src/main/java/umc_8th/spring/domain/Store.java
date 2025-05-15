@@ -23,8 +23,7 @@ public class Store extends BaseEntity {
 
     private String address;
 
-    @Column(nullable = false)
-    private Double rating = 0.0;
+    private Double rating;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")

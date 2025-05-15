@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface StoreRepositoryCustom {
     List<Store> dynamicQueryWithBooleanBuilder(String name, Double rating);
+    Store findStoreById(Long storeId);
 }
