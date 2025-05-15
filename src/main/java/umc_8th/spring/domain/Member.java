@@ -2,6 +2,9 @@ package umc_8th.spring.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import umc_8th.spring.domain.common.BaseEntity;
 import umc_8th.spring.domain.enums.Gender;
 import umc_8th.spring.domain.enums.MemberStatus;
@@ -15,6 +18,8 @@ import java.util.*;
 
 @Entity
 @Getter
+@DynamicUpdate
+@DynamicInsert
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -52,23 +57,24 @@ public class Member extends BaseEntity {
 
     private LocalDate inactiveDate;
 
-    @Column(nullable = false, length = 50)
+    //@Column(nullable = false, length = 50)
     private String email;
 
     @Column(nullable = false)
+    @ColumnDefault("0")
     private Long points;
 
     @Column(nullable = false)
     private Boolean phoneAuth;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = true, length = 20)
     private String phoneNum;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberAgree> memberAgreeList = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MemberPrefer> memberPreferList = new HashSet<>();
+    private List<MemberPrefer> memberPreferList = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviewList = new ArrayList<>();
