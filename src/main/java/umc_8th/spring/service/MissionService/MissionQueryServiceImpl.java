@@ -1,11 +1,15 @@
 package umc_8th.spring.service.MissionService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import umc_8th.spring.domain.Mission;
 import umc_8th.spring.domain.Store;
 import umc_8th.spring.domain.enums.MissionStatus;
 import umc_8th.spring.repository.MissionRepository.MissionRepository;
+import umc_8th.spring.repository.StoreRepository.StoreRepository;
 import umc_8th.spring.web.dto.HomeDTO;
 import umc_8th.spring.web.dto.MissionByStatusDTO;
 
@@ -17,6 +21,8 @@ import java.util.List;
 public class MissionQueryServiceImpl implements MissionQueryService {
 
     private final MissionRepository missionRepository;
+
+    private final StoreRepository storeRepository;
 
     @Override
     public List<MissionByStatusDTO> findMissionByMissionStatus(Long memberId, Long cursor, MissionStatus status){
@@ -30,5 +36,13 @@ public class MissionQueryServiceImpl implements MissionQueryService {
     @Override
     public HomeDTO getHome(Long memberId, Long regionId, Long cursor){
         return missionRepository.getHome(memberId, regionId, cursor);
+    }
+
+    @Override
+    public Page<Mission> getMissionList(Long storeId, Integer page) {
+        Store store = storeRepository.findById(storeId).get();
+
+        Page<Mission> StorePage = missionRepository.findAllByStore(store, PageRequest.of(page, 10));
+        return StorePage;
     }
 }
