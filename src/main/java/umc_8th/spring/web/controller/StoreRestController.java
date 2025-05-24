@@ -96,7 +96,7 @@ public class StoreRestController {
     })
     public ApiResponse<MissionResponseDTO.MissionPreViewListDTO> getMissionList(@ExistStore @PathVariable(name = "storeId") Long storeId, @CheckPage @RequestParam(name = "page") Integer page){
         page = page - 1;
-        Page<Mission> missionList = missionQueryService.getMissionList(storeId, page);
+        Page<Mission> missionList = missionQueryService.getMissionListByStore(storeId, page);
         return ApiResponse.onSuccess(MissionConverter.missionPreViewListDTO(missionList));
     }
 

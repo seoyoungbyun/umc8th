@@ -1,5 +1,7 @@
 package umc_8th.spring.repository.MemberMissionRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import umc_8th.spring.domain.Member;
 import umc_8th.spring.domain.Mission;
@@ -15,4 +17,6 @@ public interface MemberMissionRepository extends JpaRepository<MemberMission, Lo
     Optional<MemberMission> findByMemberAndMission(Member member, Mission mission);
 
     Optional<MemberMission> findByMemberIdAndMissionIdAndStatus(Long memberId, Long missionId, MissionStatus missionStatus);
+
+    Page<MemberMission> findAllByMemberAndStatus(Member member, MissionStatus missionStatus, PageRequest pageRequest);
 }
