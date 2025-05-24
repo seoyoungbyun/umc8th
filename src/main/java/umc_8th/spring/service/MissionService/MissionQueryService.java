@@ -12,5 +12,5 @@ public interface MissionQueryService {
     List<MissionByStatusDTO> findMissionByMissionStatus(Long memberId, Long cursor, MissionStatus status);
     HomeDTO getHome(Long memberId, Long regionId, Long cursor);
     Page<Mission> getMissionListByStore(Long storeId, Integer page);
-    Page<Mission> getMissionListByMember(Long userId, Integer page);
+    Page<Mission> getMissionListByMember(Long memberId, Integer page);
 }

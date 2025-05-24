@@ -55,8 +55,8 @@ public class MissionQueryServiceImpl implements MissionQueryService {
     }
 
     @Override
-    public Page<Mission> getMissionListByMember(Long userId, Integer page) {
-        Member member = memberRepository.findById(userId).get();
+    public Page<Mission> getMissionListByMember(Long memberId, Integer page) {
+        Member member = memberRepository.findById(memberId).get();
         Page<MemberMission> memberMissions = memberMissionRepository.findAllByMemberAndStatus(member, MissionStatus.CHALLENGING, PageRequest.of(page, 10));
         Page<Mission> StorePage = memberMissions.map(MemberMission::getMission);
         return StorePage;
