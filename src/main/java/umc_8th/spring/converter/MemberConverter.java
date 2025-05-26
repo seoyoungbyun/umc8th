@@ -41,6 +41,9 @@ public class MemberConverter {
                 .birth(request.getBirth())
                 .phoneAuth(false)
                 .memberPreferList(new ArrayList<>())
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .role(request.getRole())
                 .build();
     }
 }

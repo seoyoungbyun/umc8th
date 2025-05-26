@@ -8,6 +8,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import umc_8th.spring.domain.common.BaseEntity;
 import umc_8th.spring.domain.enums.Gender;
 import umc_8th.spring.domain.enums.MemberStatus;
+import umc_8th.spring.domain.enums.Role;
 import umc_8th.spring.domain.enums.SocialType;
 import umc_8th.spring.domain.mapping.MemberAgree;
 import umc_8th.spring.domain.mapping.MemberMission;
@@ -57,8 +58,14 @@ public class Member extends BaseEntity {
 
     private LocalDate inactiveDate;
 
-    //@Column(nullable = false, length = 50)
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Column(nullable = false)
     @ColumnDefault("0")
@@ -81,4 +88,8 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberMission> memberMissionList = new ArrayList<>();
+
+    public void encodePassword(String password) {
+        this.password = password;
+    }
 }
