@@ -19,6 +19,14 @@ spring:
         default_batch_fetch_size: 1000
   profiles:
     active: local
+
+jwt:
+  token:
+    secretKey: [secretKey]
+    expiration:
+      access: 14400000
+      refresh: 604800000
+
 discord:
   webhook:
     url: [discord webhook url]

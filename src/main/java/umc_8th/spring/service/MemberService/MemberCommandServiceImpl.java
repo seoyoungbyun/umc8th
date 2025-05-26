@@ -14,9 +14,11 @@ import umc_8th.spring.converter.MemberConverter;
 import umc_8th.spring.converter.MemberPreferConverter;
 import umc_8th.spring.domain.FoodCategory;
 import umc_8th.spring.domain.Member;
+import umc_8th.spring.domain.RefreshToken;
 import umc_8th.spring.domain.mapping.MemberPrefer;
 import umc_8th.spring.repository.FoodCategoryRepository.FoodCategoryRepository;
 import umc_8th.spring.repository.MemberRepository.MemberRepository;
+import umc_8th.spring.repository.RefreshTokenRepository.RefreshTokenRepository;
 import umc_8th.spring.web.dto.MemberRequestDTO;
 import umc_8th.spring.web.dto.MemberResponseDTO;
 
@@ -31,6 +33,8 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     private final MemberRepository memberRepository;
 
     private final FoodCategoryRepository foodCategoryRepository;
+
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -68,11 +72,21 @@ public class MemberCommandServiceImpl implements MemberCommandService{
                 Collections.singleton(() -> member.getRole().name())
         );
 
-        String accessToken = jwtTokenProvider.generateToken(authentication);
+        String accessToken = jwtTokenProvider.generateAccessToken(authentication);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
+
+        RefreshToken token = RefreshToken.builder()
+                .name(member.getName())
+                .email(member.getEmail())
+                .token(refreshToken)
+                .build();
+
+        refreshTokenRepository.save(token);
 
         return MemberConverter.toLoginResultDTO(
                 member.getId(),
-                accessToken
+                accessToken,
+                refreshToken
         );
     }
 }

@@ -28,7 +28,7 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes());
     }
 
-    public String generateToken(Authentication authentication) {
+    public String generateAccessToken(Authentication authentication) {
         String email = authentication.getName();
 
         return Jwts.builder()
@@ -36,6 +36,18 @@ public class JwtTokenProvider {
                 .claim("role", authentication.getAuthorities().iterator().next().getAuthority())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration().getAccess()))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateRefreshToken(Authentication authentication) {
+        String email = authentication.getName();
+
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("role", authentication.getAuthorities().iterator().next().getAuthority())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration().getRefresh()))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -75,11 +87,11 @@ public class JwtTokenProvider {
     }
 
     public Authentication extractAuthentication(HttpServletRequest request){
-        String accessToken = resolveToken(request);
-        if(accessToken == null || !validateToken(accessToken)) {
+        String token = resolveToken(request);
+        if(token == null || !validateToken(token)) {
             throw new MemberHandler(ErrorStatus.INVALID_TOKEN);
         }
-        return getAuthentication(accessToken);
+        return getAuthentication(token);
     }
 }
 
