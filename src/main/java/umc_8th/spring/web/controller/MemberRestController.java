@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +24,7 @@ import umc_8th.spring.domain.Review;
 import umc_8th.spring.domain.mapping.MemberMission;
 import umc_8th.spring.service.MemberMissionService.MemberMissionCommandService;
 import umc_8th.spring.service.MemberService.MemberCommandService;
+import umc_8th.spring.service.MemberService.MemberQueryService;
 import umc_8th.spring.service.MissionService.MissionCommandService;
 import umc_8th.spring.service.MissionService.MissionQueryService;
 import umc_8th.spring.service.ReviewService.ReviewQueryService;
@@ -39,6 +42,8 @@ import umc_8th.spring.web.dto.ReviewResponseDTO;
 @RequestMapping("/members")
 public class MemberRestController {
 
+    private final MemberQueryService memberQueryService;
+
     private final MemberCommandService memberCommandService;
 
     private final ReviewQueryService reviewQueryService;
@@ -49,7 +54,7 @@ public class MemberRestController {
 
     private final MemberMissionCommandService memberMissionCommandService;
 
-    @PostMapping("/")
+    @PostMapping("/join")
     public ApiResponse<MemberResponseDTO.JoinResultDTO> join(@RequestBody @Valid MemberRequestDTO.JoinDto request){
         Member member = memberCommandService.joinMember(request);
         return ApiResponse.onSuccess(MemberConverter.toJoinResultDTO(member));
@@ -59,6 +64,21 @@ public class MemberRestController {
     public ApiResponse<MemberResponseDTO.MemberMissionJoinResultDTO> join(@RequestBody @IsAlreadyChallenging @Valid MemberRequestDTO.MemberMissionJoinDto request){
         MemberMission memberMission = memberMissionCommandService.joinMemberMission(request);
         return ApiResponse.onSuccess(MemberMissionConverter.toJoinResultDTO(memberMission));
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "유저 로그인 API",description = "유저가 로그인하는 API입니다.")
+    public ApiResponse<MemberResponseDTO.LoginResultDTO> login(@RequestBody @Valid MemberRequestDTO.LoginRequestDTO request) {
+        return ApiResponse.onSuccess(memberCommandService.loginMember(request));
+    }
+
+    @GetMapping("/info")
+    @Operation(summary = "유저 내 정보 조회 API - 인증 필요",
+            description = "유저가 내 정보를 조회하는 API입니다.",
+            security = { @SecurityRequirement(name = "JWT TOKEN") }
+    )
+    public ApiResponse<MemberResponseDTO.MemberInfoDTO> getMyInfo(HttpServletRequest request) {
+        return ApiResponse.onSuccess(memberQueryService.getMemberInfo(request));
     }
 
     @GetMapping("{memberId}/reviews/view")

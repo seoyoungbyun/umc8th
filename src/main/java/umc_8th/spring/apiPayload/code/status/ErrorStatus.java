@@ -36,7 +36,10 @@ public enum ErrorStatus implements BaseErrorCode {
 
     MISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "MISSION4001", "해당되는 미션이 없습니다."),
     MISSION_ALREADY_CHALLENGING(HttpStatus.NOT_FOUND, "MISSION4002", "이미 진행 중인 미션입니다."),
-    MEMBER_MISSION_FOUND(HttpStatus.NOT_FOUND, "MISSION4003", "이미 진행 완료 상태인 미션입니다.");
+    MEMBER_MISSION_FOUND(HttpStatus.NOT_FOUND, "MISSION4003", "이미 진행 완료 상태인 미션입니다."),
+
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "MEMBER4003", "패스워드가 불일치합니다."),
+    INVALID_TOKEN(HttpStatus.BAD_REQUEST, "MEMBER4005", "유효하지 않은 토큰입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
