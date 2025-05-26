@@ -13,10 +13,7 @@ import umc_8th.spring.domain.enums.Gender;
 import umc_8th.spring.domain.enums.Role;
 import umc_8th.spring.repository.MemberRepository.MemberRepository;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,11 +26,21 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-        Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
+        String provider = userRequest.getClientRegistration().getRegistrationId();
 
-        String nickname = (String) properties.get("nickname");
-        String email = nickname + "@kakao.com"; // 임시 이메일 생성
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+
+        String nickname = null;
+        String email = null;
+        if (Objects.equals(provider, "kakao")) {
+            Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
+            nickname = (String) properties.get("nickname");
+            email = nickname + "@kakao.com"; // 임시 이메일 생성
+        }
+        else if (Objects.equals(provider, "google")){
+            nickname = (String) attributes.get("name");
+            email = nickname + "@google.com";
+        }
 
         // 사용자 정보 저장 또는 업데이트
         Member member = saveOrUpdateUser(email, nickname);
